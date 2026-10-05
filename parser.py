@@ -94,9 +94,9 @@ def scrap_livechess(url: str) -> str:
 
 
 def json2pgn(data: dict[str, Any], metadata: dict[str, Any]) -> str:
-    tournament = metadata.get("name", "?").replace('"', "")
-    site = metadata.get("location", "?").replace('"', "")
-    date = metadata.get("date", "????.??.??").replace("-", ".")
+    tournament = (metadata.get("name", None) or "?").replace('"', "")
+    site = (metadata.get("location", None) or "?").replace('"', "")
+    date = (metadata.get("date", None) or "????.??.??").replace("-", ".")
 
     if metadata["white"]:
         white_parts = []
