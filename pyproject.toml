@@ -20,6 +20,7 @@ dependencies = [
     "PyInputPlus>=0.2,<1",
     "requests>=2.34,<3",
     "selenium>=4.47,<5",
+    "setuptools>=84.2,<85",
     "types-selenium>=3.141,<4",
     "typing_extensions>=4.16,<5",
     "undetected-chromedriver>=3.5,<4",

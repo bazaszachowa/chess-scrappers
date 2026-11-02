@@ -7,6 +7,8 @@ from io import TextIOWrapper
 import undetected_chromedriver as uc
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 from parser import lichess_download, scrap_livechess
 
@@ -20,197 +22,11 @@ options.add_argument(
 )
 options.add_argument("--start-maximized")
 options.add_argument("--disable-blink-features=AutomationControlled")
-options.add_argument("--disable-javascript")
-browser = uc.Chrome(version_main=151, options=options)
+# options.add_argument("--disable-javascript")
+browser = uc.Chrome(version_main=156, options=options)
 
 countries = [
     "POL",
-    # "ALB",
-    # "ALG",
-    # "AND",
-    # "ANG",
-    # "ARG",
-    # "ARM",
-    # "ARU",
-    # "AUS",
-    # "AUT",
-    # "AZE",
-    # "BAH",
-    # "BRN",
-    # "BAN",
-    # "BAR",
-    # "BLR",
-    # "BEL",
-    # "BIH",
-    # "BIZ",
-    # "BOL",
-    # "BOT",
-    # "BRA",
-    # "IVB",
-    # "BRU",
-    # "BUL",
-    # "BUR",
-    # "BDI",
-    # "CAM",
-    # "CMR",
-    # "CAN",
-    # "CAF",
-    # "CHI",
-    # "CHN",
-    # "TPE",
-    # "COL",
-    # "COM",
-    # "CGO",
-    # "CRC",
-    # "CRO",
-    # "CUB",
-    # "CYP",
-    # "CZE",
-    # "DEN",
-    # "DOM",
-    # "ECU",
-    # "EGY",
-    # "ESA",
-    # "ENG",
-    # "EST",
-    # "ETH",
-    # "FAI",
-    # "FID",
-    # "FIJ",
-    # "FIN",
-    # "MKD",
-    # "FRA",
-    # "GAB",
-    # "GAM",
-    # "GBR",
-    # "GEO",
-    # "GER",
-    # "GHA",
-    # "GRE",
-    # "GUM",
-    # "GUA",
-    # "GCI",
-    # "GUY",
-    # "HAI",
-    # "HON",
-    # "HKG",
-    # "HUN",
-    # "ISL",
-    # "IND",
-    # "INA",
-    # "IRI",
-    # "IRQ",
-    # "IRL",
-    # "ISR",
-    # "ITA",
-    # "IOM",
-    # "CIV",
-    # "JAM",
-    # "JPN",
-    # "JCI",
-    # "JOR",
-    # "KAZ",
-    # "KEN",
-    # "KGZ",
-    # "KOS",
-    # "KUW",
-    # "LAO",
-    # "LAT",
-    # "LIB",
-    # "LES",
-    # "LBA",
-    # "LIE",
-    # "LTU",
-    # "LUX",
-    # "MAC",
-    # "MAD",
-    # "MAW",
-    # "MAS",
-    # "MDV",
-    # "MLI",
-    # "MLT",
-    # "MTN",
-    # "MRI",
-    # "MEX",
-    # "MDA",
-    # "MNC",
-    # "MGL",
-    # "MNE",
-    # "MAR",
-    # "MOZ",
-    # "MYA",
-    # "NAM",
-    # "NEP",
-    # "NED",
-    # "AHO",
-    # "NZL",
-    # "NCA",
-    # "NGR",
-    # "NOR",
-    # "OMA",
-    # "PAK",
-    # "PLW",
-    # "PLE",
-    # "PAN",
-    # "PNG",
-    # "PAR",
-    # "PER",
-    # "PHI",
-    # "POR",
-    # "PUR",
-    # "QAT",
-    # "ROU",
-    # "RUS",
-    # "RWA",
-    # "SMR",
-    # "STP",
-    # "KSA",
-    # "SCO",
-    # "SEN",
-    # "SRB",
-    # "SEY",
-    # "SLE",
-    # "SIN",
-    # "SGP",
-    # "SVK",
-    # "SLO",
-    # "SOL",
-    # "SOM",
-    # "SSD",
-    # "RSA",
-    # "KOR",
-    # "ESP",
-    # "SRI",
-    # "SUD",
-    # "SUR",
-    # "SWZ",
-    # "SWE",
-    # "SUI",
-    # "SYR",
-    # "TJK",
-    # "TAN",
-    # "THA",
-    # "TLS",
-    # "TOG",
-    # "TTO",
-    # "TUN",
-    # "TUR",
-    # "TKM",
-    # "UGA",
-    # "UKR",
-    # "UAE",
-    # "USA",
-    # "URU",
-    # "ISV",
-    # "UZB",
-    # "VEN",
-    # "VIE",
-    # "WLS",
-    # "YEM",
-    # "ZAM",
-    # "ZIM",
-    # "CFR",
-    # "FQE"
 ]
 
 
@@ -250,17 +66,36 @@ def process_tournament(tournament: str, output: TextIOWrapper) -> None:
         traceback.print_exc()
 
 
+def try_agree(browser: uc.Chrome) -> None:
+    try:
+        btn_download = WebDriverWait(browser, 10).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "body > div.fc-consent-root > div.fc-dialog-container > div.fc-dialog.fc-choice-dialog > "
+                    "div.fc-footer-buttons-container > div.fc-footer-buttons > button.fc-button.fc-cta-consent.fc-primary-button "
+                    "> p",
+                )
+            )
+        )
+        time.sleep(0.5)
+        btn_download.click()
+    except Exception:
+        pass
+
+
 def process_pseudo_human(output: TextIOWrapper) -> None:
     for country in countries:
         try:
             browser.get(
                 f"https://www.chessmanager.com/pl/tournaments/finished?country={country}"
             )
+            try_agree(browser)
 
             last_elem = browser.find_element(
                 By.CSS_SELECTOR,
-                "body > div.pusher > div.ui.stackable.grid.container > "
-                "div.twelve.wide.column > div.ui.centered.pagination.menu > a:nth-child(8)",
+                "body > div.pusher > main > div > div.twelve.wide.column > "
+                "div.ui.centered.pagination.menu > a:nth-child(8)",
             )
             try:
                 last_elem_value = int(last_elem.text)
@@ -271,6 +106,7 @@ def process_pseudo_human(output: TextIOWrapper) -> None:
                 browser.get(
                     f"https://www.chessmanager.com/pl/tournaments/finished?country={country}&city=&city_radius=0&offset={i * 50}"
                 )
+                try_agree(browser)
                 tournaments = [
                     link.get_attribute("href")
                     for link in browser.find_elements(By.TAG_NAME, "a")
